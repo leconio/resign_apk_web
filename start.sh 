@@ -1,0 +1,84 @@
+#!/bin/bash
+# 创建文件夹
+mkdir keystores
+mkdir uploads
+
+original_dir=$(pwd)
+# 设置脚本在遇到错误时终止执行
+set -e
+
+# 定义 JDK 文件夹名和下载 URL
+JDK_DIR="jdk-14.0.2"
+JDK_URL="https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz"
+
+# 1. 检查 JDK 是否已经下载并解压
+if [ -d "$JDK_DIR" ]; then
+    echo "已检测到 JDK 目录 $JDK_DIR，跳过下载和解压步骤。"
+else
+    echo "未检测到 JDK 目录 $JDK_DIR，下载中..."
+    wget -q $JDK_URL -O openjdk-11.tar.gz
+    echo "下载完成，正在解压..."
+    tar -xzf openjdk-11.tar.gz
+    # 删除下载的压缩包
+    rm openjdk-11.tar.gz
+    echo "解压完成。"
+fi
+
+# 2. 设置 JAVA_HOME 环境变量
+JAVA_HOME_DIR=$(pwd)/$JDK_DIR
+echo "Java 安装在: $JAVA_HOME_DIR"
+
+# 设置 JAVA_HOME 环境变量
+export JAVA_HOME=$JAVA_HOME_DIR
+export PATH=$JAVA_HOME/bin:$PATH
+
+# 3. Apksigner配置变量
+SDK_URL="https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip"
+SDK_ZIP="commandlinetools.zip"
+SDK_DIR="cmdline-tools"
+BUILD_TOOLS_VERSION="30.0.3"
+INSTALL_DIR="$HOME/android-sdk"
+
+# 检查 apksigner 是否已经存在
+if [ -x "$(command -v apksigner)" ]; then
+  echo "apksigner is already installed."
+  exit 0
+fi
+
+# 创建安装目录
+mkdir -p "$INSTALL_DIR"
+cd "$INSTALL_DIR"
+
+# 下载并解压 Android Command Line Tools
+if [ ! -d "$INSTALL_DIR/$SDK_DIR" ]; then
+  echo "Downloading Android SDK Command Line Tools..."
+  curl -o "$SDK_ZIP" "$SDK_URL"
+  unzip -q "$SDK_ZIP" -d "$INSTALL_DIR"
+  rm "$SDK_ZIP"
+fi
+
+# 使用 sdkmanager 安装 Build Tools
+PATH="$INSTALL_DIR/$SDK_DIR/bin:$PATH"
+yes | sdkmanager --sdk_root="$INSTALL_DIR" --install "build-tools;$BUILD_TOOLS_VERSION"
+
+# 检查 apksigner 是否已正确安装
+APKSIGNER_PATH="$INSTALL_DIR/build-tools/$BUILD_TOOLS_VERSION/apksigner"
+export APKSIGNER_PATH=$APKSIGNER_PATH
+if [ ! -f "$APKSIGNER_PATH" ]; then
+  echo "Failed to install apksigner."
+  exit 1
+else
+  echo "apksigner installed successfully."
+fi
+
+# 4. 使用 pip 安装 Flask
+cd "$original_dir"
+echo "正在安装 Flask..."
+pip install -r requirements.txt
+echo "Flask 安装完成。"
+
+# 启动
+python app.py
+
+# 输出结束信息
+echo "脚本执行完毕。"

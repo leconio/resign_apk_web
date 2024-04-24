@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>APK Signer</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        var logBox = $("#log-box");
+
+        $.ajax({
+          url: "/sign",
+          method: "POST",
+          data: {
+            file_path: "{{ file_path }}",
+            car_type: "{{ car_type }}",
+          },
+          xhrFields: {
+            onprogress: function (e) {
+              var log = e.currentTarget.response;
+              log = log.replace(/\n/g, "<br>");
+              logBox.append(log);
+              logBox.scrollTop(logBox.prop("scrollHeight"));
+            },
+          },
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h1>APK Signer</h1>
+    <div
+      id="log-box"
+      style="
+        height: 300px;
+        overflow-y: scroll;
+        border: 1px solid #ccc;
+        padding: 10px;
+      "
+    ></div>
+  </body>
+</html>

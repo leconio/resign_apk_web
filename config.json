@@ -1,0 +1,14 @@
+{
+  "release": {
+    "keystore": "keystores/release",
+    "alias": "android",
+    "password": "a123456",
+    "keypass": "a123456"
+  },
+  "debug": {
+    "keystore": "keystores/debug",
+    "alias": "android",
+    "password": "a123456",
+    "keypass": "a123456"
+  }
+}

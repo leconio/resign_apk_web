@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>APK Signing Tool</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        var logBox = $("#log-box");
+        var eventSource = new EventSource("/stream");
+
+        eventSource.onmessage = function (event) {
+          logBox.append(event.data + "<br>");
+          logBox.scrollTop(logBox.prop("scrollHeight"));
+        };
+      });
+    </script>
+  </head>
+  <body>
+    <h1>APK Signing Tool</h1>
+    <form action="/" method="post" enctype="multipart/form-data">
+      <label for="file">Select APK file:</label>
+      <input type="file" name="file" id="file" required /><br /><br />
+      <label for="car_type">Choose your keystore</label>
+      <select name="car_type" id="car_type" required>
+        {% for car_type in car_types %}
+        <option value="{{ car_type }}">{{ car_type }}</option>
+        {% endfor %}</select
+      ><br /><br />
+      <input type="submit" value="Upload and re-Sign" />
+    </form>
+  </body>
+</html>
